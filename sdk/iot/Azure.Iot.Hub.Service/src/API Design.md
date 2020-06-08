@@ -45,26 +45,25 @@ APIs for managing device identities, device twins, and querying devices
 public class Devices
 {
     /// <summary>
-    /// Create a device identity.
+    /// Create or update a device.
     /// </summary>
     /// <param name="deviceIdentity">The device to create.</param>
+    /// <param name="precondition">The condition on which to perform this operation. To create a device identity, this value must be equal to <see cref="IfMatchPrecondition.Unconditional"/>.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The created device.</returns>
-    public virtual async Task<Response<DeviceIdentity>> CreateIdentityAsync(DeviceIdentity deviceIdentity, CancellationToken cancellationToken = default)
+    public virtual async Task<Response<DeviceIdentity>> CreateOrUpdateIdentityAsync(DeviceIdentity deviceIdentity, IfMatchPrecondition precondition, CancellationToken cancellationToken = default)
 
     /// <summary>
-    /// Update a device identity.
+    /// Create or update a device.
     /// </summary>
-    /// <param name="deviceIdentity">The device to update.</param>
-    /// <param name="ifMatch">A string representing a weak ETag for this device, as per RFC7232. The update operation is performed
-    /// only if this ETag matches the value maintained by the server, indicating that the device has not been modified since it was last retrieved.
-    /// The current ETag can be retrieved from the device identity last retrieved from the service. To force an unconditional update, set If-Match to the wildcard character (*).</param>
+    /// <param name="deviceIdentity">The device to create.</param>
+    /// <param name="precondition">The condition on which to perform this operation. To create a device identity, this value must be equal to <see cref="IfMatchPrecondition.Unconditional"/>.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The created or updated device.</returns>
-    public virtual async Task<Response<DeviceIdentity>> UpdateIdentityAsync(DeviceIdentity deviceIdentity, string ifMatch = null, CancellationToken cancellationToken = default)
+    /// <returns>The created device.</returns>
+    public virtual Response<DeviceIdentity> CreateOrUpdateIdentity(DeviceIdentity deviceIdentity, IfMatchPrecondition precondition, CancellationToken cancellationToken = default)
 
     /// <summary>
-    /// Get a single device identity.
+    /// Get a single device.
     /// </summary>
     /// <param name="deviceId">The unique identifier of the device to get.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
@@ -72,27 +71,51 @@ public class Devices
     public virtual async Task<Response<DeviceIdentity>> GetIdentityAsync(string deviceId, CancellationToken cancellationToken = default)
 
     /// <summary>
-    /// Delete a single device identity.
+    /// Get a single device.
     /// </summary>
-    /// <param name="deviceId">The unique identifier of the device to delete.</param>
-    /// <param name="ifMatch">A string representing a weak ETag for this device, as per RFC7232. The delete operation is performed
-    /// only if this ETag matches the value maintained by the server, indicating that the device has not been modified since it was last retrieved.
-	/// The current ETag can be retrieved from the device identity last retrieved from the service. To force an unconditional delete, set If-Match to the wildcard character (*).</param>
+    /// <param name="deviceId">The unique identifier of the device to get.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The http response.</returns>
-    public virtual async Task<Response> DeleteIdentityAsync(string deviceId, string ifMatch = null, CancellationToken cancellationToken = default)
+    /// <returns>The retrieved device.</returns>
+    public virtual Response<DeviceIdentity> GetIdentity(string deviceId, CancellationToken cancellationToken = default)
 
     /// <summary>
-    /// Create multiple device identities with an initial twin. A maximum of 100 creations can be done per call, and each creation must have a unique device identity. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// Delete a single device.
+    /// </summary>
+    /// <param name="deviceIdentity">The device to delete. If no ETag is present on the device, then the condition must be equal to <see cref="IfMatchPrecondition.Unconditional"/> or equal to <see cref="IfMatchPrecondition.UnconditionalIfMatch"/></param>
+    /// <param name="precondition">The condition on which to delete the device.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The http response.</returns>
+    public virtual async Task<Response> DeleteIdentityAsync(DeviceIdentity deviceIdentity, IfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Delete a single device.
+    /// </summary>
+    /// <param name="deviceIdentity">The device to delete. If no ETag is present on the device, then the condition must be equal to <see cref="IfMatchPrecondition.Unconditional"/> or equal to <see cref="IfMatchPrecondition.UnconditionalIfMatch"/></param>
+    /// <param name="precondition">The condition on which to delete the device.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The http response.</returns>
+    public virtual Response DeleteIdentity(DeviceIdentity deviceIdentity, IfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Create multiple devices with an initial twin. A maximum of 100 creations can be done per call, and each creation must have a unique device identity. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
     /// </summary>
     /// <param name="devices">The pairs of devices their twins that will be created. For fields such as deviceId
     /// where device and twin have a definition, the device value will override the twin value.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the bulk operation.</returns>
-    public async Task<Response<BulkRegistryOperationResult>> CreateIdentitiesWithTwinAsync(IDictionary<DeviceIdentity, TwinData> devices, CancellationToken cancellationToken = default)
+    public virtual async Task<Response<BulkRegistryOperationResult>> CreateIdentitiesWithTwinAsync(IDictionary<DeviceIdentity, TwinData> devices, CancellationToken cancellationToken = default)
 
     /// <summary>
-    /// Create multiple device identities. A maximum of 100 creations can be done per call, and each device identity must be unique. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// Create multiple devices with an initial twin. A maximum of 100 creations can be done per call, and each creation must have a unique device identity. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// </summary>
+    /// <param name="devices">The pairs of devices their twins that will be created. For fields such as deviceId
+    /// where device and twin have a definition, the device value will override the twin value.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the bulk operation.</returns>
+    public virtual Response<BulkRegistryOperationResult> CreateIdentitiesWithTwin(IDictionary<DeviceIdentity, TwinData> devices, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Create multiple devices. A maximum of 100 creations can be done per call, and each device identity must be unique. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
     /// </summary>
     /// <param name="deviceIdentities">The devices to create.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
@@ -100,24 +123,48 @@ public class Devices
     public virtual async Task<Response<BulkRegistryOperationResult>> CreateIdentitiesAsync(IEnumerable<DeviceIdentity> deviceIdentities, CancellationToken cancellationToken = default)
 
     /// <summary>
-    /// Update multiple device identities. A maximum of 100 updates can be done per call, and each operation must be done on a different identity. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// Create multiple devices. A maximum of 100 creations can be done per call, and each device identity must be unique. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
     /// </summary>
-    /// <param name="deviceIdentities">The devices to update.</param>
-    /// <param name="force">If true, the devices will be updated even if their ETag is out of date.
-    /// If false, each device will only be updated if its ETag is up to date.</param>
+    /// <param name="deviceIdentities">The devices to create.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the bulk operation.</returns>
-    public virtual async Task<Response<BulkRegistryOperationResult>> UpdateIdentiesAsync(IEnumerable<DeviceIdentity> deviceIdentities, bool force, CancellationToken cancellationToken = default)
-    
+    public virtual Response<BulkRegistryOperationResult> CreateIdentities(IEnumerable<DeviceIdentity> deviceIdentities, CancellationToken cancellationToken = default)
+
     /// <summary>
-    /// Delete multiple device identities. A maximum of 100 deletions can be done per call. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// Update multiple devices. A maximum of 100 updates can be done per call, and each operation must be done on a different identity. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// </summary>
+    /// <param name="deviceIdentities">The devices to update.</param>
+    /// <param name="precondition">Perform these operations only on this condition.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the bulk operation.</returns>
+    public virtual async Task<Response<BulkRegistryOperationResult>> UpdateIdentiesAsync(IEnumerable<DeviceIdentity> deviceIdentities, BulkIfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Update multiple devices. A maximum of 100 updates can be done per call, and each operation must be done on a different identity. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// </summary>
+    /// <param name="deviceIdentities">The devices to update.</param>
+    /// <param name="precondition">The condition for which each operation will execute.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the bulk operation.</returns>
+    public virtual Response<BulkRegistryOperationResult> UpdateIdenties(IEnumerable<DeviceIdentity> deviceIdentities, BulkIfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Delete multiple devices. A maximum of 100 deletions can be done per call. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
     /// </summary>
     /// <param name="deviceIdentities">The devices to delete.</param>
-    /// <param name="force">If true, the devices will be deleted even if their ETag is out of date.
-    /// If false, each device will only be deleted if its ETag is up to date.</param>
+    /// <param name="precondition">The condition for which each operation will execute.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the bulk deletion.</returns>
-    public virtual async Task<Response<BulkRegistryOperationResult>> DeleteIdentitiesAsync(IEnumerable<DeviceIdentity> deviceIdentities, bool force, CancellationToken cancellationToken = default)
+    public virtual async Task<Response<BulkRegistryOperationResult>> DeleteIdentitiesAsync(IEnumerable<DeviceIdentity> deviceIdentities, BulkIfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Delete multiple devices. A maximum of 100 deletions can be done per call. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// </summary>
+    /// <param name="deviceIdentities">The devices to delete.</param>
+    /// <param name="precondition">The condition for which each operation will execute.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the bulk deletion.</returns>
+    public virtual Response<BulkRegistryOperationResult> DeleteIdentities(IEnumerable<DeviceIdentity> deviceIdentities, BulkIfMatchPrecondition precondition, CancellationToken cancellationToken = default)
 
     /// <summary>
     /// List a set of device twins.
@@ -127,33 +174,63 @@ public class Devices
     public virtual AsyncPageable<TwinData> GetTwinsAsync(CancellationToken cancellationToken = default)
 
     /// <summary>
+    /// List a set of device twins.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A pageable set of device twins.</returns>
+    public virtual Pageable<TwinData> GetTwins(CancellationToken cancellationToken = default)
+
+    /// <summary>
     /// Get a device's twin.
     /// </summary>
     /// <param name="deviceId">The unique identifier of the device to get the twin of.</param>
-    /// <param name="cancellationToken">The cancellation token</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The device's twin, including reported properties and desired properties.</returns>
     public virtual async Task<Response<TwinData>> GetTwinAsync(string deviceId, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Get a device's twin.
+    /// </summary>
+    /// <param name="deviceId">The unique identifier of the device to get the twin of.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The device's twin, including reported properties and desired properties.</returns>
+    public virtual Response<TwinData> GetTwin(string deviceId, CancellationToken cancellationToken = default)
 
     /// <summary>
     /// Update a device's twin.
     /// </summary>
     /// <param name="twinPatch">The properties to update. Any existing properties not referenced by this patch will be unaffected by this patch.</param>
-    /// <param name="ifMatch">A string representing a weak ETag for this twin, as per RFC7232. The update operation is performed
-    /// only if this ETag matches the value maintained by the server, indicating that the twin has not been modified since it was last retrieved.
-    /// To force an unconditional update, set If-Match to the wildcard character (*).</param>
-    /// <param name="cancellationToken">The cancellation token</param>
+    /// <param name="precondition">The condition for which this operation will execute.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The server's new representation of the device twin.</returns>
-    public virtual async Task<Response<TwinData>> UpdateTwinAsync(TwinData twinPatch, string ifMatch = null, CancellationToken cancellationToken = default)
+    public virtual async Task<Response<TwinData>> UpdateTwinAsync(TwinData twinPatch, IfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Update a device's twin.
+    /// </summary>
+    /// <param name="twinPatch">The properties to update. Any existing properties not referenced by this patch will be unaffected by this patch.</param>
+    /// <param name="precondition">The condition for which this operation will execute.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The server's new representation of the device twin.</returns>
+    public virtual Response<TwinData> UpdateTwin(TwinData twinPatch, IfMatchPrecondition precondition, CancellationToken cancellationToken = default)
 
     /// <summary>
     /// Update multiple devices' twins. A maximum of 100 updates can be done per call, and each operation must be done on a different device twin. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
     /// </summary>
-    /// <param name="twinUpdates">The new twins to replace the twins on existing devices</param>
-    /// <param name="force">If true, all the update operations will ignore the provided twin ETags and will
-    /// force the update. If false, each update operation will fail if the provided ETag for the update is out of date.</param>
-    /// <param name="cancellationToken">The cancellation token</param>
+    /// <param name="twinUpdates">The new twins to replace the twins on existing devices.</param>
+    /// <param name="precondition">The condition for which each operation will execute.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the bulk operation.</returns>
-    public virtual async Task<Response<BulkRegistryOperationResult>> UpdateTwinsAsync(IEnumerable<TwinData> twinUpdates, bool force, CancellationToken cancellationToken = default)
+    public virtual async Task<Response<BulkRegistryOperationResult>> UpdateTwinsAsync(IEnumerable<TwinData> twinUpdates, BulkIfMatchPrecondition precondition, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Update multiple devices' twins. A maximum of 100 updates can be done per call, and each operation must be done on a different device twin. For larger scale operations, consider using IoT Hub jobs (https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities).
+    /// </summary>
+    /// <param name="twinUpdates">The new twins to replace the twins on existing devices.</param>
+    /// <param name="precondition">The condition for which each operation will execute.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the bulk operation.</returns>
+    public virtual Response<BulkRegistryOperationResult> UpdateTwins(IEnumerable<TwinData> twinUpdates, BulkIfMatchPrecondition precondition, CancellationToken cancellationToken = default)
 
     /// <summary>
     /// Invoke a method on a device.
@@ -162,7 +239,16 @@ public class Devices
     /// <param name="directMethodRequest">The details of the method to invoke.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the method invocation.</returns>
-    public virtual async Task<Response<CloudToDeviceMethodResult>> InvokeMethodAsync(string deviceId, CloudToDeviceMethod directMethodRequest, CancellationToken cancellationToken = default)
+    public virtual async Task<Response<CloudToDeviceMethodResponse>> InvokeMethodAsync(string deviceId, CloudToDeviceMethodRequest directMethodRequest, CancellationToken cancellationToken = default)
+
+    /// <summary>
+    /// Invoke a method on a device.
+    /// </summary>
+    /// <param name="deviceId">The unique identifier of the device to invoke the method on.</param>
+    /// <param name="directMethodRequest">The details of the method to invoke.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the method invocation.</returns>
+    public virtual Response<CloudToDeviceMethodResponse> InvokeMethod(string deviceId, CloudToDeviceMethodRequest directMethodRequest, CancellationToken cancellationToken = default)
 }
 ```
 </details>
