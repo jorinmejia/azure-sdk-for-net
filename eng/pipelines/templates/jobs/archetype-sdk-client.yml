@@ -3,7 +3,8 @@ jobs:
     variables:
       - template: ../variables/globals.yml
     pool:
-      vmImage: windows-2019
+      name: azsdk-pool-mms2019-ds2v2-general # Comment this line back-out to switch to public pools.
+      # vmImage: windows-2019 # Comment this line back-in to switch to public pools.
     steps:
       - ${{if eq(parameters.TestPipeline, 'true')}}:
         - task: PowerShell@2
@@ -110,39 +111,44 @@ jobs:
     condition: and(succeededOrFailed(), ne(variables['Skip.Test'], true))
     variables:
       - template: ../variables/globals.yml
-      - name: disable.coverage.autogenerate
-        value: true
     strategy:
       maxParallel: $[ variables['MaxParallelTestJobs'] ]
       matrix:
         Linux:
+          Pool: # Intentionally blank.
           OSVmImage: "ubuntu-18.04"
           TestTargetFramework: netcoreapp2.1
         Windows_NetCoreApp:
-          OSVmImage: "windows-2019"
+          Pool: azsdk-pool-mms2019-ds2v2-general # Comment out to swap back to public hosted pool.
+          OSVmImage: # "windows-2019" # Comment back in to swap back to public hosted pool.
           TestTargetFramework: netcoreapp2.1
           CollectCoverage: true
         Windows_NetCoreApp_ProjectReferences:
-          OSVmImage: "windows-2019"
+          Pool: azsdk-pool-mms2019-ds2v2-general # Comment out to swap back to public hosted pool.
+          OSVmImage: # "windows-2019" # Comment back in to swap back to public hosted pool.
           TestTargetFramework: netcoreapp2.1
           ConvertToProjectReferenceOption: /p:UseProjectReferenceToAzureClients=true
         Windows_NetFramework:
-          OSVmImage: "windows-2019"
+          Pool: azsdk-pool-mms2019-ds2v2-general # Comment out to swap back to public hosted pool.
+          OSVmImage: # "windows-2019" # Comment back in to swap back to public hosted pool.
           TestTargetFramework: net461
         Windows_NetFramework_ProjectReferences:
-          OSVmImage: "windows-2019"
+          Pool: azsdk-pool-mms2019-ds2v2-general # Comment out to swap back to public hosted pool.
+          OSVmImage: # "windows-2019" # Comment back in to swap back to public hosted pool.
           TestTargetFramework: net461
           ConvertToProjectReferenceOption: /p:UseProjectReferenceToAzureClients=true
         MacOs:
+          Pool: # Intentionally blank.
           OSVmImage: "macOS-10.15"
           TestTargetFramework: netcoreapp2.1
         Windows_Net50:
-          OSVmImage: "windows-2019"
+          Pool: azsdk-pool-mms2019-ds2v2-general # Comment out to swap back to public hosted pool.
+          OSVmImage: # "windows-2019" # Comment back in to swap back to public hosted pool.
           TestTargetFramework: net5.0
     pool:
       vmImage: "$(OSVmImage)"
+      name: "$(Pool)"
     steps:
-      - template: /eng/common/pipelines/templates/steps/verify-agent-os.yml
       - ${{ each step in parameters.TestSetupSteps }}:
         - ${{ each pair in step }}:
             ${{ pair.key }}: ${{ pair.value }}
@@ -167,18 +173,17 @@ jobs:
           testResultsFormat: "VSTest"
           mergeTestResults: true
       - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
-        condition: and(succeededOrFailed(), eq(variables['CollectCoverage'], 'true'))
+        condition: and(succeededOrFailed(), eq(variables['CollectCoverage'], 'true'), eq(variables['coverage.collected'], 'true'))
         displayName: Generate Code Coverage Reports
         inputs:
           reports: $(Build.SourcesDirectory)\sdk\${{parameters.ServiceDirectory}}\**\coverage.cobertura.xml
           targetdir: $(Build.ArtifactStagingDirectory)\coverage
-          reporttypes: Cobertura;HtmlInline_AzurePipelines
+          reporttypes: Cobertura
           filefilters: +$(Build.SourcesDirectory)\sdk\${{parameters.ServiceDirectory}}\**
           verbosity: Verbose
       - task: PublishCodeCoverageResults@1
-        condition: and(succeededOrFailed(), eq(variables['CollectCoverage'], 'true'))
+        condition: and(succeededOrFailed(), eq(variables['CollectCoverage'], 'true'), eq(variables['coverage.collected'], 'true'))
         displayName: Publish Code Coverage Reports
         inputs:
           codeCoverageTool: Cobertura
           summaryFileLocation: $(Build.ArtifactStagingDirectory)\coverage\Cobertura.xml
-          reportDirectory: $(Build.ArtifactStagingDirectory)\coverage
